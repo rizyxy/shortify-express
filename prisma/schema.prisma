@@ -19,10 +19,11 @@ model User {
 }
 
 model RefreshToken {
-  id     String @id @default(cuid())
-  token  String @unique
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
+  id      String  @id @default(cuid())
+  token   String  @unique
+  userId  String
+  user    User    @relation(fields: [userId], references: [id])
+  isValid Boolean @default(true)
 }
 
 model Link {
