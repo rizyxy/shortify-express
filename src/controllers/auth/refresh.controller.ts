@@ -18,11 +18,26 @@ export default async function refresh(req: Request, res: Response) {
             return res.status(403).json({ error: "Invalid refresh token" });
         }
 
-        const tokens = generateTokens(refreshToken.userId);
+        if (!refreshToken.isValid) {
+
+            await prisma.refreshToken.deleteMany({
+                where: {
+                    userId: refreshToken.userId
+                }
+            });
+
+            return res.status(403).json({ error: "Invalid refresh token" });
+        }
 
         await prisma.refreshToken.update({
             where: { token },
-            data: { token: tokens.refreshToken }
+            data: { isValid: false }
+        });
+
+        const tokens = generateTokens(refreshToken.userId);
+
+        await prisma.refreshToken.create({
+            data: { token: tokens.refreshToken, userId: refreshToken.userId }
         });
 
         return res.json(tokens);
